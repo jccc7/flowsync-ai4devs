@@ -8,6 +8,7 @@ export const controllers = {
   NewAccount: () => import('#controllers/new_account_controller'),
   Profile: () => import('#controllers/profile_controller'),
   TaskDueDates: () => import('#controllers/task_due_dates_controller'),
+  TaskOpenapiSchemas: () => import('#controllers/task_openapi_schemas'),
   TaskStatuses: () => import('#controllers/task_statuses_controller'),
   Tasks: () => import('#controllers/tasks_controller'),
 }
