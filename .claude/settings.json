@@ -13,6 +13,28 @@
         ]
       }
     ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 30,
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/registrar-prompts.sh prompt"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 30,
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/registrar-prompts.sh respuesta"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
