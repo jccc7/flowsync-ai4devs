@@ -46,6 +46,12 @@ export default class Task extends TaskSchema {
    * la comparación de días del calendario: no hay hora, ni huso, ni instante
    * intermedio donde se cuele un día de más.
    *
+   * Que `dueDate` sea texto cuando viene de la base **no** lo garantiza el tipo:
+   * lo garantiza el parser de `DATE` que registra `config/database.ts`. Sin él,
+   * el driver `pg` entrega un `Date`, `Date < string` compara contra `NaN` y
+   * esto devuelve siempre `false` sin lanzar nada, con el typecheck en verde.
+   * Quien lo vigila es `tests/functional/tasks/due_date.spec.ts`.
+   *
    * Esta es la única definición de «vencida» del sistema. No se reimplementa en
    * ninguna otra capa, y en particular el frontend nunca compara fechas.
    */
