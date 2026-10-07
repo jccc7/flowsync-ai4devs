@@ -1,27 +1,38 @@
-import app from '@adonisjs/core/services/app'
+import pg from 'pg'
+import env from '#start/env'
 import { defineConfig } from '@adonisjs/lucid'
+
+/**
+ * Una columna `date` es un día del calendario y el modelo la trata como texto
+ * ISO (`database/schema_rules.ts`). Con SQLite llegaba así sin más; el driver
+ * `pg`, en cambio, la convierte por defecto en un `Date` de JS a medianoche
+ * del huso del proceso. Eso rompía la API (`dueDate` salía como instante) y
+ * `Task.isOverdueOn`, que compara texto con texto. Se devuelve tal cual llega.
+ */
+pg.types.setTypeParser(pg.types.builtins.DATE, (value) => value)
 
 const dbConfig = defineConfig({
   /**
    * Default connection used for all queries.
    */
-  connection: 'sqlite',
+  connection: 'pg',
 
   connections: {
     /**
-     * SQLite connection (default).
+     * PostgreSQL en Docker (ver `compose.yaml` en la raíz). Desarrollo y
+     * pruebas usan la misma conexión: lo que cambia es el fichero de entorno.
+     * Con `NODE_ENV=test` Adonis carga `.env.test`, que apunta a `db-test`
+     * (puerto 54411, en memoria) en vez de a `db` (puerto 54410).
      */
-    sqlite: {
-      client: 'better-sqlite3',
-
+    pg: {
+      client: 'pg',
       connection: {
-        filename: app.tmpPath('db.sqlite3'),
+        host: env.get('DB_HOST'),
+        port: env.get('DB_PORT'),
+        user: env.get('DB_USER'),
+        password: env.get('DB_PASSWORD'),
+        database: env.get('DB_DATABASE'),
       },
-
-      /**
-       * Required by Knex for SQLite defaults.
-       */
-      useNullAsDefault: true,
 
       migrations: {
         /**
@@ -47,26 +58,6 @@ const dbConfig = defineConfig({
         rulesPaths: ['./database/schema_rules.js'],
       },
     },
-
-    /**
-     * PostgreSQL connection.
-     * Install package to switch: npm install pg
-     */
-    // pg: {
-    //   client: 'pg',
-    //   connection: {
-    //     host: env.get('DB_HOST'),
-    //     port: env.get('DB_PORT'),
-    //     user: env.get('DB_USER'),
-    //     password: env.get('DB_PASSWORD'),
-    //     database: env.get('DB_DATABASE'),
-    //   },
-    //   migrations: {
-    //     naturalSort: true,
-    //     paths: ['database/migrations'],
-    //   },
-    //   debug: app.inDev,
-    // },
 
     /**
      * MySQL / MariaDB connection.

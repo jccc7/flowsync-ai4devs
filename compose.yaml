@@ -1,0 +1,51 @@
+# FlowSync — bases de datos PostgreSQL para desarrollo y para pruebas.
+#
+# Se levantan con `make db-up` (que espera a que las dos estén sanas) y se
+# paran con `make db-down`. Las credenciales son de juguete y solo valen en
+# local: coinciden con las de backend/.env.example y backend/.env.test.
+#
+# Sin clave `version:`: está obsoleta en la especificación de Compose y Docker
+# imprime un aviso si aparece.
+
+# Lo que comparten los dos servicios. La comprobación de salud va por TCP
+# (`-h 127.0.0.1`) a propósito: la primera vez que arranca, el entrypoint de la
+# imagen crea la base con un servidor temporal que solo escucha en el socket
+# Unix. Un `pg_isready` por socket lo daría por listo mientras aún no acepta
+# conexiones desde fuera, y el backend fallaría al conectar justo después.
+x-postgres: &postgres
+  image: pgvector/pgvector:pg17
+  healthcheck:
+    test: ['CMD-SHELL', 'pg_isready -h 127.0.0.1 -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+    interval: 2s
+    timeout: 3s
+    retries: 30
+    start_period: 10s
+
+services:
+  db:
+    <<: *postgres
+    environment:
+      POSTGRES_USER: flowsync
+      POSTGRES_PASSWORD: flowsync
+      POSTGRES_DB: flowsync_dev
+    ports:
+      - '54410:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  # Sin volumen: los datos viven en un tmpfs y desaparecen al parar el
+  # contenedor. Cada `make db-up` da una base de pruebas vacía, para que
+  # ninguna batería dependa de lo que dejó la anterior.
+  db-test:
+    <<: *postgres
+    environment:
+      POSTGRES_USER: flowsync
+      POSTGRES_PASSWORD: flowsync
+      POSTGRES_DB: flowsync_test
+    ports:
+      - '54411:5432'
+    tmpfs:
+      - /var/lib/postgresql/data
+
+volumes:
+  db-data:

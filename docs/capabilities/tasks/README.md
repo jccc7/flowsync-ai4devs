@@ -112,7 +112,9 @@ empiezan por «La interfaz SHALL…».
 cd backend
 npm install
 cp .env.example .env && node ace generate:key   # solo la primera vez
-node ace migration:run                          # crea tmp/db.sqlite3
+make -C .. db-up                                # levanta PostgreSQL (desarrollo y pruebas) en Docker
+node ace migration:run                          # migra la base de desarrollo
+NODE_ENV=test node ace migration:run            # migra la base de pruebas
 ```
 
 ### Tests automáticos
@@ -125,18 +127,19 @@ node ace test --tests="el responsable llega con su nombre y sus iniciales"
 ```
 
 Los tests de esta capability están en
-[`backend/tests/functional/tasks/`](../../../backend/tests/functional/tasks/). **Hoy solo hay uno**,
-`assignee.spec.ts`, que cubre 3 de los 124 scenarios de la spec: los del requisito *Lo que cada tarea
-muestra de su responsable*. Todo lo demás está sin cubrir, así que el verde de la suite **no** es
-señal de que la capability cumpla su spec.
+[`backend/tests/functional/tasks/`](../../../backend/tests/functional/tasks/). **Hoy solo hay dos**:
+`assignee.spec.ts`, que cubre 3 de los 124 scenarios de la spec (los del requisito *Lo que cada tarea
+muestra de su responsable*), y `due_date.spec.ts`, una prueba de regresión del motor: comprueba que
+`dueDate` vuelve de PostgreSQL como día (`YYYY-MM-DD`) y que una tarea leída de la base sale vencida
+cuando toca. Todo lo demás está sin cubrir, así que el verde de la suite **no** es señal de que la
+capability cumpla su spec.
 
 Dos cosas que hay que saber antes de escribir un test aquí:
 
-- La suite functional pega contra **el mismo fichero SQLite que el servidor de desarrollo**:
-  [`config/database.ts`](../../../backend/config/database.ts) declara una sola conexión sin override
-  por entorno. Aísla siempre con `testUtils.db().withGlobalTransaction()` en un `group.each.setup`,
-  como hacen los tests existentes. **No** uses truncate: se llevaría por delante los datos con los que
-  estés trabajando.
+- La suite functional va contra **su propia base**, `db-test` de `compose.yaml` (puerto 54411, en
+  memoria): `node ace test` carga [`.env.test`](../../../backend/.env.test), que apunta allí. Aun así,
+  aísla siempre con `testUtils.db().withGlobalTransaction()` en un `group.each.setup`, como hacen los
+  tests existentes, para que ningún test dependa de lo que dejó otro.
 - Un test por scenario, citando el requisito en la cabecera del fichero. Es lo que permite leer la
   spec y saber qué falta.
 

@@ -1,6 +1,6 @@
 # FlowSync — atajos de desarrollo.
 #
-# Requisitos: Node.js + npm y GNU Make.
+# Requisitos: Node.js + npm, GNU Make y Docker con el plugin Compose.
 #   - macOS:        make viene con las Command Line Tools de Xcode.
 #   - Linux / WSL:  sudo apt install make   (o el equivalente de tu distro)
 #
@@ -14,7 +14,7 @@ BACKEND  := backend
 FRONTEND := frontend
 
 .DEFAULT_GOAL := help
-.PHONY: help setup start install env migrate clean
+.PHONY: help setup start install env migrate test db-up db-down clean
 
 # La ayuda se genera a partir de los comentarios `## ...` de cada target, para
 # que no haya un segundo listado que mantener a mano y que pueda divergir.
@@ -29,7 +29,7 @@ help: ## Muestra esta ayuda
 # setup
 # ---------------------------------------------------------------------------
 
-setup: install env migrate ## Deja el proyecto listo para arrancar
+setup: install env migrate ## Deja el proyecto listo para arrancar (levanta las bases)
 	@echo ""
 	@echo "✅ Setup completado. Arranca todo con: make start"
 
@@ -61,9 +61,41 @@ env:
 		cd $(BACKEND) && node ace generate:key; \
 	fi
 
-migrate:
-	@echo "🗃️  Ejecutando migraciones..."
+# Las dos bases: la de desarrollo con el .env normal y la de pruebas con
+# NODE_ENV=test, que hace que Adonis cargue además .env.test (puerto 54411).
+# La de pruebas vive en memoria: cada `db-up` tras un `db-down` llega vacía y
+# hay que volver a migrarla, cosa que `make test` ya hace por su cuenta.
+migrate: db-up ## Migra la base de desarrollo y la de pruebas
+	@echo "🗃️  Migrando la base de desarrollo..."
 	@cd $(BACKEND) && node ace migration:run
+	@echo "🗃️  Migrando la base de pruebas..."
+	@cd $(BACKEND) && NODE_ENV=test node ace migration:run
+
+# ---------------------------------------------------------------------------
+# bases de datos (compose.yaml)
+# ---------------------------------------------------------------------------
+
+# `--wait` no vuelve hasta que las comprobaciones de salud de `db` y `db-test`
+# pasan: la primera vez la imagen crea la base y no acepta conexiones mientras
+# tanto, y migrar en ese hueco falla.
+db-up: ## Levanta las dos bases y espera a que estén sanas
+	@command -v docker >/dev/null 2>&1 || { echo "❌ Docker no está instalado."; exit 1; }
+	@echo "🐘 Levantando PostgreSQL (desarrollo :54410, pruebas :54411)..."
+	@docker compose up -d --wait
+
+# Para los contenedores sin borrar el volumen de desarrollo. La base de
+# pruebas, que no tiene volumen, se pierde: es lo que se busca.
+db-down: ## Para las dos bases (los datos de desarrollo se conservan)
+	@echo "🐘 Parando PostgreSQL..."
+	@docker compose down
+
+# ---------------------------------------------------------------------------
+# test
+# ---------------------------------------------------------------------------
+
+test: db-up ## Migra la base de pruebas y corre la batería del backend
+	@cd $(BACKEND) && NODE_ENV=test node ace migration:run
+	@cd $(BACKEND) && npm test
 
 # ---------------------------------------------------------------------------
 # start
@@ -91,7 +123,7 @@ migrate:
 # delante a él también. Aislar los servidores en su propio grupo con `set -m`
 # no vale: los dejaría en segundo plano y el primer `read` de stdin les
 # provocaría un SIGTTIN, colgando el "Press h" de Adonis y los atajos de Vite.
-start: ## Levanta backend y frontend a la vez
+start: db-up ## Levanta las bases, el backend y el frontend
 	@if [ ! -d $(BACKEND)/node_modules ] || [ ! -d $(FRONTEND)/node_modules ]; then \
 		echo "❌ Faltan dependencias. Ejecuta primero: make setup"; exit 1; \
 	fi
@@ -112,8 +144,8 @@ start: ## Levanta backend y frontend a la vez
 # clean
 # ---------------------------------------------------------------------------
 
-clean: ## Borra node_modules y la base de datos SQLite
+clean: ## Borra node_modules y las bases (también el volumen de desarrollo)
 	@echo "🧹 Limpiando..."
 	@rm -rf $(BACKEND)/node_modules $(FRONTEND)/node_modules
-	@rm -f $(BACKEND)/tmp/db.sqlite3 $(BACKEND)/tmp/db.sqlite3-wal $(BACKEND)/tmp/db.sqlite3-shm
+	@docker compose down -v
 	@echo "✅ Listo. Vuelve a ejecutar: make setup"

@@ -6,7 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 FlowSync: proyecto de práctica del curso (gestión de tareas en equipo). Monorepo sin workspaces ni `package.json` raíz — **todos los comandos se ejecutan desde `backend/` o desde `frontend/`**.
 
-- `backend/` — API AdonisJS 7 + Lucid 22 + SQLite, escucha en `http://localhost:3333`
+- `backend/` — API AdonisJS 7 + Lucid 22 + PostgreSQL 17 (Docker), escucha en `http://localhost:3333`
+- `compose.yaml` (raíz) — servicios `db` (desarrollo, puerto 54410, con volumen) y `db-test` (pruebas, puerto 54411, en memoria). `make db-up` / `make db-down`
 - `frontend/` — React 19 + Vite 8, escucha en `http://localhost:5173`
 
 La rama `s1/start` es el punto de partida de los alumnos; `main` es la base del repo cliente.
@@ -18,7 +19,9 @@ La rama `s1/start` es el punto de partida de los alumnos; `main` es la base del 
 ```bash
 npm install
 cp .env.example .env && node ace generate:key   # solo la primera vez
-node ace migration:run                          # crea tmp/db.sqlite3 y regenera database/schema.ts
+make db-up                                      # desde la raíz: levanta db y db-test y espera a que estén sanas
+node ace migration:run                          # migra la base de desarrollo y regenera database/schema.ts
+NODE_ENV=test node ace migration:run            # migra la base de pruebas (o `make migrate` desde la raíz, las dos)
 npm run dev                                     # node ace serve --hmr
 npm test                                        # node ace test
 npm run openapi:generate                        # escribe el documento OpenAPI en docs/api/openapi.json
@@ -38,7 +41,9 @@ node ace test --groups=... --tags=... --failed --watch
 node ace make:test --suite=functional # scaffolding de un fichero de test
 ```
 
-Ojo con la BD en tests: `config/database.ts` define una única conexión SQLite apuntando a `app.tmpPath('db.sqlite3')` sin override por entorno, así que las suites functional pegan contra el **mismo fichero** que el servidor de desarrollo. `.env.test` solo cambia `SESSION_DRIVER=memory`. Si añades tests que escriben, aísla con los hooks de `testUtils.db()` (truncate / transacción global) o el estado se filtra entre runs.
+BD en tests: `config/database.ts` define una sola conexión `pg` que lee `DB_*` del entorno. `node ace test` corre con `NODE_ENV=test`, así que Adonis carga `.env.test` encima de `.env` y la batería va contra `db-test` (puerto 54411), no contra la de desarrollo. `db-test` vive en un tmpfs: tras un `db-down` llega vacía y hay que volver a migrarla (`make test` lo hace solo). Aun así, aísla cada test con `testUtils.db().withGlobalTransaction()` para que no dependan entre sí.
+
+Las columnas `date` llegan como texto (`YYYY-MM-DD`) porque `config/database.ts` registra un parser de tipo en `pg`; sin él el driver las convierte en `Date` y rompe `dueDate`.
 
 Otros comandos útiles: `node ace list:routes`, `node ace make:controller|model|migration|validator|transformer|service`, `node ace migration:fresh`, `node ace repl`.
 
