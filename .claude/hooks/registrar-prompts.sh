@@ -3,10 +3,12 @@
 # (raíz del proyecto) cada prompt y cada respuesta, en Markdown y sin borrar
 # nunca lo que ya hay (solo añade al final; si el fichero no existe, lo crea).
 #
-#   Prompt:     <fecha y hora> · Herramienta · Modelo · Esfuerzo · Sesión
-#               ## Prompt # N            (N sigue al mayor que ya haya en el fichero)
-#               el texto, literal, dentro de un bloque de código
-#   Respuesta:  ## Respuesta a Prompt # N
+# El formato es el de la plantilla de entrega del curso (`git show
+# 898650a:prompts.md`), que es lo que lee la herramienta que revisa:
+#   Prompt:     ## Prompt N              (N sigue al mayor que ya haya en el fichero)
+#               **Modelo:**, **Herramienta:** (más fecha y hora, esfuerzo y sesión)
+#               el texto, literal, dentro de un bloque de código sin lenguaje
+#   Respuesta:  ### Respuesta a Prompt N (subapartado del prompt, después de su bloque)
 #               todo el texto de la respuesta + las herramientas que se usaron
 #
 # De dónde sale cada dato:
@@ -59,10 +61,7 @@ ahora() { date '+%Y-%m-%d %H:%M:%S %Z'; }
 asegurar_destino() {
   [ -f "$destino" ] && return 0
   cat >"$destino" <<'EOF'
-# Registro de prompts
-
-Registro automático de cada prompt y cada respuesta, escrito por el hook
-`.claude/hooks/registrar-prompts.sh`. Solo se añade al final; no se borra nada.
+# Prompts
 EOF
 }
 
@@ -118,9 +117,9 @@ registrar_respuesta() {
   hasta=${2:-$(lineas_transcript)}
   if [ "$(leer '.respondido')" = "true" ]; then
     # Otro Stop sin prompt nuevo (p. ej. un agente en segundo plano que despierta al modelo).
-    titulo="## Respuesta a Prompt # $num (continuación)"
+    titulo="### Respuesta a Prompt $num (continuación)"
   else
-    titulo="## Respuesta a Prompt # $num"
+    titulo="### Respuesta a Prompt $num"
   fi
   entradas=$(
     [ -f "$transcript" ] && head -n "$hasta" "$transcript" | tail -n +"$((desde + 1))" |
@@ -186,16 +185,15 @@ registrar_prompt() {
   fecha=${fecha:-$(ahora)}
 
   asegurar_destino
-  max=$(grep -oE '^## Prompt # [0-9]+' "$destino" | grep -oE '[0-9]+$' | sort -n | tail -1)
+  max=$(grep -oE '^## Prompt #? ?[0-9]+$' "$destino" | grep -oE '[0-9]+$' | sort -n | tail -1)
   num=$((${max:-0} + 1))
   fence=$(fence_para "$prompt")
 
   {
-    printf '\n---\n\n'
-    printf '**Fecha y hora:** %s · **Herramienta:** %s · **Modelo:** %s · **Esfuerzo:** %s · **ID de sesión:** `%s`\n' \
-      "$fecha" "$herramienta" "$modelo" "$esfuerzo" "$sesion"
-    printf '## Prompt # %s\n\n' "$num"
-    printf '%stext\n%s\n%s\n' "$fence" "$prompt" "$fence"
+    printf '\n---\n\n## Prompt %s\n\n' "$num"
+    printf '**Modelo:** %s\n**Herramienta:** %s\n**Esfuerzo:** %s\n**Fecha y hora:** %s\n**ID de sesión:** `%s`\n\n' \
+      "$modelo" "$herramienta" "$esfuerzo" "$fecha" "$sesion"
+    printf '%s\n%s\n%s\n' "$fence" "$prompt" "$fence"
   } >>"$destino"
 
   guardar --argjson num "$num" --argjson desde "$desde" \
