@@ -106,25 +106,34 @@ def resumen:
      else "" end)
 JQ
 
+# $1: last_assistant_message (vacío si no lo hay).
+# $2: última línea del transcript que pertenece a la respuesta; al registrarla
+#     con retraso, la anterior al prompt siguiente. Sin él, hasta el final.
 registrar_respuesta() {
-  local final=$1 num desde hasta titulo cuerpo
+  local final=$1 num desde hasta titulo entradas cuerpo fin fecha
   num=$(leer '.prompt')
   [ -n "$num" ] || return 0
   desde=$(leer '.desde')
   desde=${desde:-0}
-  hasta=$(lineas_transcript)
+  hasta=${2:-$(lineas_transcript)}
   if [ "$(leer '.respondido')" = "true" ]; then
     # Otro Stop sin prompt nuevo (p. ej. un agente en segundo plano que despierta al modelo).
     titulo="## Respuesta a Prompt # $num (continuación)"
   else
     titulo="## Respuesta a Prompt # $num"
   fi
-  cuerpo=$(
-    { [ -f "$transcript" ] && tail -n +"$((desde + 1))" "$transcript"; } |
-      jq -R 'fromjson? // empty' | jq -rs --arg final "$final" "$PROGRAMA_RESPUESTA"
-  ) || return 0
+  entradas=$(
+    [ -f "$transcript" ] && head -n "$hasta" "$transcript" | tail -n +"$((desde + 1))" |
+      jq -R -c 'fromjson? // empty'
+  )
+  cuerpo=$(jq -rs --arg final "$final" "$PROGRAMA_RESPUESTA" <<<"$entradas") || return 0
+  # Hora del último mensaje de la respuesta; si no la hay (Stop con el
+  # transcript aún sin volcar), la de ahora, que es cuando acaba el turno.
+  fin=$(jq -r 'select(.type == "assistant" and (.isSidechain | not)) | .timestamp // empty' <<<"$entradas" | tail -1)
+  if [ -n "$fin" ] && [ -z "$final" ]; then fecha=$(date -d "$fin" '+%Y-%m-%d %H:%M:%S %Z' 2>/dev/null); fi
+  fecha=${fecha:-$(ahora)}
   asegurar_destino
-  printf '\n%s\n\n*Finalizada: %s*\n\n%s\n' "$titulo" "$(ahora)" "$cuerpo" >>"$destino"
+  printf '\n%s\n\n*Finalizada: %s*\n\n%s\n' "$titulo" "$fecha" "$cuerpo" >>"$destino"
   guardar --argjson hasta "$hasta" '.respondido = true | .desde = $hasta'
 }
 
@@ -142,11 +151,6 @@ registrar_prompt() {
   prompt=$(campo '.prompt')
   prompt_id=$(campo '.prompt_id')
 
-  # Respuesta anterior que ningún Stop llegó a registrar.
-  if [ -n "$(leer '.prompt')" ] && [ "$(leer '.respondido')" != "true" ]; then
-    registrar_respuesta ""
-  fi
-
   # Si el prompt ya está en el transcript, de ahí salen su línea y su hora exacta.
   if [ -n "$prompt_id" ] && [ -f "$transcript" ]; then
     IFS=$'\t' read -r linea ts < <(
@@ -156,6 +160,11 @@ registrar_prompt() {
     )
   fi
   desde=${linea:-$(lineas_transcript)}
+
+  # Respuesta anterior que ningún Stop llegó a registrar: acaba justo antes de este prompt.
+  if [ -n "$(leer '.prompt')" ] && [ "$(leer '.respondido')" != "true" ]; then
+    registrar_respuesta "" "$((linea ? linea - 1 : desde))"
+  fi
 
   if [ -f "$transcript" ]; then
     modelo=$(head -n "$desde" "$transcript" | jq -R -r 'fromjson? // empty
