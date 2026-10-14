@@ -1,0 +1,163 @@
+🐘 Levantando PostgreSQL (db y db-test)...
+ Container flowsync-ai4devs-db-test-1 Running 
+ Container flowsync-ai4devs-db-1 Running 
+ Container flowsync-ai4devs-db-1 Waiting 
+ Container flowsync-ai4devs-db-test-1 Waiting 
+ Container flowsync-ai4devs-db-1 Healthy 
+ Container flowsync-ai4devs-db-test-1 Healthy 
+🗃️  Migrando la base de desarrollo...
+Already up to date
+❯ Scanned "pg" database and found 3 tables
+❯ Scanned table auth_access_tokens
+❯ Scanned table tasks
+❯ Scanned table users
+❯ Creating schema classes for scanned tables
+[ success ] Schema classes generated (45 ms)
+🗃️  Migrando la base de pruebas...
+Already up to date
+❯ Scanned "pg" database and found 3 tables
+❯ Scanned table auth_access_tokens
+❯ Scanned table tasks
+❯ Scanned table users
+❯ Creating schema classes for scanned tables
+[ success ] Schema classes generated (47 ms)
+c[ info ] loading hooks...
+[ info ] generating indexes...
+[ info ] codegen: created 5 file(s)
+[ info ] booting application to run tests...
+✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✖✔✔✔✖✖✔✔✔✔✔✔✔{"level":40,"time":1791956731478,"pid":8421,"hostname":"Alienware","request_id":"cfbe19d1-31c9-4a2d-8d6a-876393743d84","x-request-id":"cfbe19d1-31c9-4a2d-8d6a-876393743d84","msg":"Row not found"}
+{"level":40,"time":1791956731498,"pid":8421,"hostname":"Alienware","request_id":"42351980-a9c7-4260-a408-289beba6bcdc","x-request-id":"42351980-a9c7-4260-a408-289beba6bcdc","msg":"Row not found"}
+{"level":40,"time":1791956731531,"pid":8421,"hostname":"Alienware","request_id":"f1a9900d-14b9-4d2d-affa-545ddaa2b2e1","x-request-id":"f1a9900d-14b9-4d2d-affa-545ddaa2b2e1","msg":"Row not found"}
+✔✔{"level":40,"time":1791956731694,"pid":8421,"hostname":"Alienware","request_id":"c24af713-6268-482c-81ef-4ab9bf42514c","x-request-id":"c24af713-6268-482c-81ef-4ab9bf42514c","msg":"Row not found"}
+{"level":40,"time":1791956731711,"pid":8421,"hostname":"Alienware","request_id":"4e87bf5f-9782-4a53-a887-e4fbbfb9d0a5","x-request-id":"4e87bf5f-9782-4a53-a887-e4fbbfb9d0a5","msg":"Row not found"}
+{"level":40,"time":1791956731730,"pid":8421,"hostname":"Alienware","request_id":"fa6e3df4-31f3-4da8-b558-2615ef5db82d","x-request-id":"fa6e3df4-31f3-4da8-b558-2615ef5db82d","msg":"Row not found"}
+✔{"level":40,"time":1791956731810,"pid":8421,"hostname":"Alienware","request_id":"962ebfa5-5328-4847-acce-d695d157a2f4","x-request-id":"962ebfa5-5328-4847-acce-d695d157a2f4","msg":"Row not found"}
+{"level":40,"time":1791956731828,"pid":8421,"hostname":"Alienware","request_id":"8b0b23c2-e6ad-4af9-8feb-24fcdd903c0d","x-request-id":"8b0b23c2-e6ad-4af9-8feb-24fcdd903c0d","msg":"Row not found"}
+{"level":40,"time":1791956731843,"pid":8421,"hostname":"Alienware","request_id":"14c31013-ef87-4187-9255-9ed1a089cc2e","x-request-id":"14c31013-ef87-4187-9255-9ed1a089cc2e","msg":"Row not found"}
+✔{"level":40,"time":1791956731920,"pid":8421,"hostname":"Alienware","request_id":"3d4046f7-5078-4430-8a35-9e570f4944d5","x-request-id":"3d4046f7-5078-4430-8a35-9e570f4944d5","msg":"Row not found"}
+{"level":40,"time":1791956731940,"pid":8421,"hostname":"Alienware","request_id":"843a65d0-f37d-4730-8cef-d053e2982464","x-request-id":"843a65d0-f37d-4730-8cef-d053e2982464","msg":"Row not found"}
+{"level":40,"time":1791956731958,"pid":8421,"hostname":"Alienware","request_id":"405256a5-1f67-411d-874a-2034111cc807","x-request-id":"405256a5-1f67-411d-874a-2034111cc807","msg":"Row not found"}
+✔✔✔✔✔{"level":40,"time":1791956732323,"pid":8421,"hostname":"Alienware","request_id":"fbd2d9a4-5f9e-4253-abfb-87cc018eb57b","x-request-id":"fbd2d9a4-5f9e-4253-abfb-87cc018eb57b","msg":"Row not found"}
+✔{"level":40,"time":1791956732390,"pid":8421,"hostname":"Alienware","request_id":"faf39970-d018-433a-a918-7ffc25196d6b","x-request-id":"faf39970-d018-433a-a918-7ffc25196d6b","msg":"Row not found"}
+✔
+ ERRORS 
+
+❯ Tasks | vencimiento / fecha del día anterior: llega marcada como vencida
+
+- Expected  - 1
++ Received  + 1
+
+  Object {
+-   "alConsultar": true,
++   "alConsultar": false,
+    "alFijar": true,
+  }
+
+ℹ AssertionError: expected { alFijar: true, alConsultar: false } to deeply equal { alFijar: true, alConsultar: true }
+
+ ⁃ at Assert.deepEqual (node_modules/@japa/assert/build/index.js:85:19)
+ ⁃ at Object.executor (tests/functional/tasks/overdue.spec.ts:105:12)
+
+   100 ┃    test('fecha del día anterior: llega marcada como vencida', async ({ client, assert }) => {
+   101 ┃      const { token, id } = await tareaNueva(client)
+   102 ┃  
+   103 ┃      const isOverdue = await vencidaAlFijarYAlConsultar(client, token, id, DIA_ANTERIOR)
+   104 ┃  
+ ❯ 105 ┃      assert.deepEqual(isOverdue, { alFijar: true, alConsultar: true })
+   106 ┃    })
+   107 ┃  
+   108 ┃    test('vencer hoy todavía no es estar vencida', async ({ client, assert }) => {
+   109 ┃      const { token, id } = await tareaNueva(client)
+   110 ┃  
+
+ ⁃ at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ ⁃ at async #wrapTestInTimeout (node_modules/@japa/core/build/index.js:680:4)
+ ⁃ at async TestRunner.run (node_modules/@japa/core/build/index.js:710:4)
+ ⁃ at async Test$1.exec (node_modules/@japa/core/build/index.js:918:3)
+ ⁃ at async GroupRunner.run (node_modules/@japa/core/build/index.js:259:4)
+ ⁃ at async Group$1.exec (node_modules/@japa/core/build/index.js:354:3)
+ ⁃ at async SuiteRunner.run (node_modules/@japa/core/build/index.js:1100:4)
+ ⁃ at async Suite$1.exec (node_modules/@japa/core/build/index.js:1175:3)
+[1/3]─
+
+❯ Tasks | vencimiento / darla por hecha la deja de vencer y conserva su fecha
+
+- Expected  - 1
++ Received  + 1
+
+  Object {
+-   "alConsultar": true,
++   "alConsultar": false,
+    "alFijar": true,
+  }
+
+ℹ AssertionError: precondición: la tarea tendría que estar vencida: expected { alFijar: true, alConsultar: false } to deeply equal { alFijar: true, alConsultar: true }
+
+ ⁃ at Assert.deepEqual (node_modules/@japa/assert/build/index.js:85:19)
+ ⁃ at Object.executor (tests/functional/tasks/overdue.spec.ts:146:12)
+
+   141 ┃    test('darla por hecha la deja de vencer y conserva su fecha', async ({ client, assert }) => {
+   142 ┃      const { token, id } = await tareaNueva(client)
+   143 ┃  
+   144 ┃      // Precondición: la tarea está vencida, por los dos caminos.
+   145 ┃      const antes = await vencidaAlFijarYAlConsultar(client, token, id, FECHA_PASADA)
+ ❯ 146 ┃      assert.deepEqual(
+   147 ┃        antes,
+   148 ┃        { alFijar: true, alConsultar: true },
+   149 ┃        'precondición: la tarea tendría que estar vencida'
+   150 ┃      )
+   151 ┃      const fechaAntes = (await consultar(client, token, id)).dueDate
+
+ ⁃ at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ ⁃ at async #wrapTestInTimeout (node_modules/@japa/core/build/index.js:680:4)
+ ⁃ at async TestRunner.run (node_modules/@japa/core/build/index.js:710:4)
+ ⁃ at async Test$1.exec (node_modules/@japa/core/build/index.js:918:3)
+ ⁃ at async GroupRunner.run (node_modules/@japa/core/build/index.js:259:4)
+ ⁃ at async Group$1.exec (node_modules/@japa/core/build/index.js:354:3)
+ ⁃ at async SuiteRunner.run (node_modules/@japa/core/build/index.js:1100:4)
+ ⁃ at async Suite$1.exec (node_modules/@japa/core/build/index.js:1175:3)
+[2/3]─
+
+❯ Tasks | vencimiento / una tarea hecha con la fecha pasada no llega vencida
+
+- Expected  - 1
++ Received  + 1
+
+  Object {
+    "alConsultar": false,
+-   "alFijar": false,
++   "alFijar": true,
+  }
+
+ℹ AssertionError: expected { alFijar: true, alConsultar: false } to deeply equal { alFijar: false, alConsultar: false }
+
+ ⁃ at Assert.deepEqual (node_modules/@japa/assert/build/index.js:85:19)
+ ⁃ at Object.executor (tests/functional/tasks/overdue.spec.ts:169:12)
+
+   164 ┃      const { token, id } = await tareaNueva(client)
+   165 ┃      await cambiarEstado(client, token, id, 'done')
+   166 ┃  
+   167 ┃      const isOverdue = await vencidaAlFijarYAlConsultar(client, token, id, FECHA_PASADA)
+   168 ┃  
+ ❯ 169 ┃      assert.deepEqual(isOverdue, { alFijar: false, alConsultar: false })
+   170 ┃    })
+   171 ┃  
+   172 ┃    test('aplazar resuelve el vencimiento en la misma respuesta', async ({ client, assert }) => {
+   173 ┃      const { token, id } = await tareaNueva(client)
+   174 ┃  
+
+ ⁃ at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ ⁃ at async #wrapTestInTimeout (node_modules/@japa/core/build/index.js:680:4)
+ ⁃ at async TestRunner.run (node_modules/@japa/core/build/index.js:710:4)
+ ⁃ at async Test$1.exec (node_modules/@japa/core/build/index.js:918:3)
+ ⁃ at async GroupRunner.run (node_modules/@japa/core/build/index.js:259:4)
+ ⁃ at async Group$1.exec (node_modules/@japa/core/build/index.js:354:3)
+ ⁃ at async SuiteRunner.run (node_modules/@japa/core/build/index.js:1100:4)
+ ⁃ at async Suite$1.exec (node_modules/@japa/core/build/index.js:1175:3)
+[3/3]─
+
+ FAILED 
+
+Tests  44 passed, 3 failed (47)
+ Time  5s
+make: *** [Makefile:124: test-e2e] Error 1

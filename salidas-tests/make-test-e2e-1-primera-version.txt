@@ -1,0 +1,84 @@
+🐘 Levantando PostgreSQL (db y db-test)...
+ Container flowsync-ai4devs-db-test-1 Running 
+ Container flowsync-ai4devs-db-1 Running 
+ Container flowsync-ai4devs-db-test-1 Waiting 
+ Container flowsync-ai4devs-db-1 Waiting 
+ Container flowsync-ai4devs-db-test-1 Healthy 
+ Container flowsync-ai4devs-db-1 Healthy 
+🗃️  Migrando la base de desarrollo...
+Already up to date
+❯ Scanned "pg" database and found 3 tables
+❯ Scanned table users
+❯ Scanned table auth_access_tokens
+❯ Scanned table tasks
+❯ Creating schema classes for scanned tables
+[ success ] Schema classes generated (63 ms)
+🗃️  Migrando la base de pruebas...
+Already up to date
+❯ Scanned "pg" database and found 3 tables
+❯ Scanned table users
+❯ Scanned table auth_access_tokens
+❯ Scanned table tasks
+❯ Creating schema classes for scanned tables
+[ success ] Schema classes generated (67 ms)
+c[ info ] loading hooks...
+[ info ] generating indexes...
+[ info ] codegen: created 5 file(s)
+[ info ] booting application to run tests...
+✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✔✖✔✔✔✔✔✔✔✔✔✔✔✔{"level":40,"time":1791955739647,"pid":7331,"hostname":"Alienware","request_id":"8de8e7f2-f246-4d85-8648-7fd11241f884","x-request-id":"8de8e7f2-f246-4d85-8648-7fd11241f884","msg":"Row not found"}
+{"level":40,"time":1791955739671,"pid":7331,"hostname":"Alienware","request_id":"3727cb29-b206-4bb6-93e4-2182aa3141d8","x-request-id":"3727cb29-b206-4bb6-93e4-2182aa3141d8","msg":"Row not found"}
+{"level":40,"time":1791955739710,"pid":7331,"hostname":"Alienware","request_id":"3727cc3b-c984-4200-b0aa-f267867599d2","x-request-id":"3727cc3b-c984-4200-b0aa-f267867599d2","msg":"Row not found"}
+✔✔{"level":40,"time":1791955739898,"pid":7331,"hostname":"Alienware","request_id":"d8d135fd-a9c4-4c13-99bb-5c94b73aa937","x-request-id":"d8d135fd-a9c4-4c13-99bb-5c94b73aa937","msg":"Row not found"}
+{"level":40,"time":1791955739936,"pid":7331,"hostname":"Alienware","request_id":"3be785d8-29f4-4050-b0b2-c5f021441873","x-request-id":"3be785d8-29f4-4050-b0b2-c5f021441873","msg":"Row not found"}
+{"level":40,"time":1791955739983,"pid":7331,"hostname":"Alienware","request_id":"c0ad0c88-4a03-4114-b3e5-8af0740b1c30","x-request-id":"c0ad0c88-4a03-4114-b3e5-8af0740b1c30","msg":"Row not found"}
+✔{"level":40,"time":1791955740132,"pid":7331,"hostname":"Alienware","request_id":"0807a4b2-4cc2-47d5-8462-0c5a7987b851","x-request-id":"0807a4b2-4cc2-47d5-8462-0c5a7987b851","msg":"Row not found"}
+{"level":40,"time":1791955740227,"pid":7331,"hostname":"Alienware","request_id":"68bd2b1e-ace4-4b44-8d36-fc313349494b","x-request-id":"68bd2b1e-ace4-4b44-8d36-fc313349494b","msg":"Row not found"}
+{"level":40,"time":1791955740316,"pid":7331,"hostname":"Alienware","request_id":"c1984e0f-efc4-41d7-adb2-b4ae2c1bbb3b","x-request-id":"c1984e0f-efc4-41d7-adb2-b4ae2c1bbb3b","msg":"Row not found"}
+✔{"level":40,"time":1791955740435,"pid":7331,"hostname":"Alienware","request_id":"f6aa7b96-4232-4ed6-895f-2b962b680d61","x-request-id":"f6aa7b96-4232-4ed6-895f-2b962b680d61","msg":"Row not found"}
+{"level":40,"time":1791955740453,"pid":7331,"hostname":"Alienware","request_id":"b8d906ee-07ee-4c35-8513-861b23d27945","x-request-id":"b8d906ee-07ee-4c35-8513-861b23d27945","msg":"Row not found"}
+{"level":40,"time":1791955740472,"pid":7331,"hostname":"Alienware","request_id":"0029d2c7-30d3-4476-8184-d91aa428693d","x-request-id":"0029d2c7-30d3-4476-8184-d91aa428693d","msg":"Row not found"}
+✔✔✔✔✔{"level":40,"time":1791955740861,"pid":7331,"hostname":"Alienware","request_id":"6a9b9682-a63f-48e7-a79c-0e0975390e94","x-request-id":"6a9b9682-a63f-48e7-a79c-0e0975390e94","msg":"Row not found"}
+✔{"level":40,"time":1791955740933,"pid":7331,"hostname":"Alienware","request_id":"2d713d4a-3e8d-47b8-a375-ec894a57a7f0","x-request-id":"2d713d4a-3e8d-47b8-a375-ec894a57a7f0","msg":"Row not found"}
+✔
+ ERRORS 
+
+❯ Tasks | vencimiento / fecha del día anterior: llega marcada como vencida
+
+- Expected  - 1
++ Received  + 1
+
+- true
++ false
+
+ℹ AssertionError: expected false to be true
+
+ ⁃ at Assert.isTrue (node_modules/@japa/assert/build/index.js:117:19)
+ ⁃ at Object.executor (tests/functional/tasks/overdue.spec.ts:89:12)
+
+   84 ┃      await fijarFecha(client, token, id, DIA_ANTERIOR)
+   85 ┃  
+   86 ┃      const tarea = await consultar(client, token, id)
+   87 ┃  
+   88 ┃      assert.equal(tarea.status, 'pending')
+ ❯ 89 ┃      assert.isTrue(tarea.isOverdue)
+   90 ┃    })
+   91 ┃  
+   92 ┃    test('vencer hoy todavía no es estar vencida', async ({ client, assert }) => {
+   93 ┃      const { token, id } = await tareaNueva(client)
+   94 ┃      await fijarFecha(client, token, id, DIA_DE_REFERENCIA)
+
+ ⁃ at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+ ⁃ at async #wrapTestInTimeout (node_modules/@japa/core/build/index.js:680:4)
+ ⁃ at async TestRunner.run (node_modules/@japa/core/build/index.js:710:4)
+ ⁃ at async Test$1.exec (node_modules/@japa/core/build/index.js:918:3)
+ ⁃ at async GroupRunner.run (node_modules/@japa/core/build/index.js:259:4)
+ ⁃ at async Group$1.exec (node_modules/@japa/core/build/index.js:354:3)
+ ⁃ at async SuiteRunner.run (node_modules/@japa/core/build/index.js:1100:4)
+ ⁃ at async Suite$1.exec (node_modules/@japa/core/build/index.js:1175:3)
+[1/1]─
+
+ FAILED 
+
+Tests  46 passed, 1 failed (47)
+ Time  6s
+make: *** [Makefile:124: test-e2e] Error 1
